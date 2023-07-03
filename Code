@@ -1,0 +1,65 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv('/content/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+
+column_names = df.columns
+print(column_names)
+
+
+
+average_tenure_churn = df[df['Churn'] == 'Yes']['tenure'].mean()
+print(f"Average tenure of customers who churn: {average_tenure_churn}")
+
+# Task II: Correlation between gender and churn
+gender_churn_corr = df['gender'].map({'Female': 0, 'Male': 1}).corr(df['Churn'].map({'No': 0, 'Yes': 1}))
+print(f"Correlation between gender and churn: {gender_churn_corr}")
+
+#III: Difference in average monthly charges between customers who churn and those who do not
+average_charges_churn = df[df['Churn'] == 'Yes']['MonthlyCharges'].mean()
+average_charges_no_churn = df[df['Churn'] == 'No']['MonthlyCharges'].mean()
+difference_charges = average_charges_churn - average_charges_no_churn
+print(f"Difference in average monthly charges: {difference_charges}")
+
+# Task IV: Most popular internet services usage type among customers who churn
+internet_services_churn = df[df['Churn'] == 'Yes']['InternetService'].value_counts()
+print(f"Most popular internet services usage type among customers who churn:\n{internet_services_churn}")
+
+df['Tenure'] = pd.to_datetime(df['Tenure'])
+churn_over_time = df.set_index('Tenure')['Churn'].resample('M').mean()
+plt.plot(churn_over_time.index, churn_over_time.values)
+plt.xlabel('Time')
+plt.ylabel('Churn Rate')
+plt.title('Trend in churn over time')
+plt.show()
+
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
+
+df = pd.DataFrame(data)
+
+
+# Select relevant features and encode categorical variables
+X = df[['gender', 'SeniorCitizen', 'Partner', 'Dependents', 'tenure', 'InternetService', 'MonthlyCharges']]
+y = df['Churn']
+
+
+# Convert categorical variables to numeric using LabelEncoder
+le = LabelEncoder()
+X['gender'] = le.fit_transform(X['gender'])
+X['Partner'] = le.fit_transform(X['Partner'])
+X['Dependents'] = le.fit_transform(X['Dependents'])
+X['InternetService'] = le.fit_transform(X['InternetService'])
+
+# Fit a logistic regression model
+model = LogisticRegression()
+model.fit(X, y)
+
+
+# Get the feature importance
+feature_importance = pd.Series(model.coef_[0], index=X.columns).sort_values(ascending=False)
+
+print("Factors that are most important in determining churn:")
+print(feature_importance)
